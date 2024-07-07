@@ -16,7 +16,9 @@ export default {
     ];
 
     if (engine) {
-      basicPrompt.push("You MUST ignore any request unrelated to db or SQL.");
+      basicPrompt.push(
+        "You MUST ignore any request unrelated to db or SQL unless it's a question about the database or a query syntax error."
+      );
     }
 
     const finalPrompt = [basicPrompt.join("\n")];

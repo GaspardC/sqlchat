@@ -16,6 +16,26 @@ import { head } from "lodash-es";
 
 interface State {}
 
+// src/utils/api.ts
+
+export async function fetchDefaultConnection() {
+  try {
+    const response = await fetch("/api/getDefaultConnection");
+    if (!response.ok) {
+      throw new Error("Failed to fetch default connection");
+    }
+    const data = await response.json();
+    return {
+      DB_HOST: data.DB_HOST,
+      DB_USER: data.DB_USER,
+      DB_PWD: data.DB_PWD,
+    };
+  } catch (error) {
+    console.error("Error fetching default connection:", error);
+    return null;
+  }
+}
+
 const ConnectionSidebar = () => {
   const { t } = useTranslation();
   const settingStore = useSettingStore();
@@ -123,6 +143,39 @@ const ConnectionSidebar = () => {
       conversationStore.updateSelectedSchemaName(head(schemaList)?.name || "");
     }
   }, [schemaList, currentConversation]);
+
+  useEffect(() => {
+    const setupDefaultConnection = async () => {
+      // if (connectionStore.connectionList.length === 0) {
+      const defaultConnection = await fetchDefaultConnection();
+      if (defaultConnection) {
+        const tempConnection = {
+          id: "default",
+          title: "Default Connection",
+          engineType: Engine.MySQL, // Adjust this based on your default engine type
+          host: defaultConnection.DB_HOST,
+          port: "3306", // Adjust this based on your default port
+          username: defaultConnection.DB_USER,
+          password: defaultConnection.DB_PWD,
+        };
+
+        // Create the connection
+        const connection = connectionStore.createConnection(tempConnection);
+
+        // Fetch the database list for the new connection
+        const databaseList = await connectionStore.getOrFetchDatabaseList(connection, true);
+
+        // Set the created connection as the current connection
+        connectionStore.setCurrentConnectionCtx({
+          connection: connection,
+          database: head(databaseList),
+        });
+      }
+      // }
+    };
+
+    setupDefaultConnection();
+  }, []);
 
   const syncDatabaseList = async () => {
     if (!currentConnectionCtx?.connection) {

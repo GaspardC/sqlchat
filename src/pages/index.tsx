@@ -38,7 +38,7 @@ const IndexPage: NextPage = () => {
         <QueryDrawer />
       </main>
 
-      <Script defer data-domain="sqlchat.ai" src="https://plausible.io/js/script.js" />
+      {/* <Script defer data-domain="sqlchat.ai" src="https://plausible.io/js/script.js" /> */}
     </div>
   );
 };
